@@ -1,5 +1,5 @@
 let aopMap = new Map<any, AopData>();
-function iaop()
+export function iaop()
 {
     return function (target: Object, propertyKey: string, descriptor: PropertyDescriptor)
     {
@@ -36,7 +36,7 @@ class AopData
     }
 }
 
-namespace xaop
+export namespace xaop
 {
     export function begin(f: any, call)
     {
@@ -49,14 +49,11 @@ namespace xaop
 
     function registeredFunc(arr: Array<any>, call)
     {
+        var index = arr.length;
         arr.push(call);
         return () =>
         {
-            let index = arr.indexOf(arr, call);
-            if (index != -1)
-            {
-                arr.splice(index, 1);
-            }
+            arr.splice(index, 1);
         }
     }
 }
