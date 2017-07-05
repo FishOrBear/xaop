@@ -15,7 +15,7 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
     let newMethon = function (...args)
     {
         call(data.m_Begin, ...args);
-        let res = _oldFunc(...args);
+        let res = _oldFunc.call(this, ...args);
         args.push(res);
         call(data.m_Ending, ...args);
         return res;
