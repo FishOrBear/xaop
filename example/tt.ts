@@ -26,6 +26,13 @@ export class E
         }
         return this.m_Index;
     }
+
+    @iaop
+    add = (v: number) =>
+    {
+        this.m_Index += v;
+        return this.m_Index;
+    }
 }
 
 
