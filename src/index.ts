@@ -1,26 +1,36 @@
 let aopMap = new Map<any, AopData>();
 
+
+function call(funcArr, ...args)
+{
+    funcArr.forEach(f =>
+    {
+        f(...args)
+    });
+}
 export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
 {
     let data = new AopData();
     let _oldFunc;
     let newMethon = function (...args)
     {
-        data.m_Begin.forEach(f =>
-        {
-            f();
-        })
-        _oldFunc(...args);
-        data.m_Ending.forEach(f =>
-        {
-            f();
-        })
+        call(data.m_Begin, ...args);
+        let res = _oldFunc(...args);
+        args.push(res);
+        call(data.m_Ending, ...args);
+        return res;
     }
     if (!descriptor)
     {
         var getter = function ()
         {
-            return newMethon;
+            if (typeof _oldFunc == "function")
+                return newMethon;
+            else
+            {
+                console.warn("warning:this is not a function!")
+                return _oldFunc
+            }
         };
         var setter = function (newVal)
         {
@@ -59,11 +69,14 @@ export namespace xaop
 
     function registeredFunc(arr: Array<any>, call)
     {
-        var index = arr.length;
         arr.push(call);
         return () =>
         {
-            arr.splice(index, 1);
+            let index = arr.indexOf(call);
+            if (index != -1)
+            {
+                arr.splice(index, 1)
+            }
         }
     }
 }
