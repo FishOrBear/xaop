@@ -41,21 +41,20 @@ test('inject two begin', () =>
 test('inject two begin2. independent inject', () =>
 {
     let e = new E();
+    let e2 = new E()
+
     expect(e.m_Index).toBe(0);
     xaop.begin(e.increment, () =>
     {
         e.m_Index++;
     })
-    xaop.begin(e.increment, () =>
-    {
-        e.m_Index++;
-    })
     e.increment();
-    expect(e.m_Index).toBe(3);
-
-    let e2 = new E()
+    expect(e.m_Index).toBe(2);
     e2.increment()
     expect(e2.m_Index).toBe(1)
+
+    expect(e.increment == e2.increment).toBe(false)
+    expect(e.m_Index).toBe(2);
 });
 
 //注入 捕捉参数
