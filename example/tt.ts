@@ -2,23 +2,19 @@ import { iaop } from '../src/index';
 export class E
 {
     m_Index = 0;
-    @iaop
     increment()
     {
         this.m_Index++;
     }
-    @iaop
     decrement()
     {
         this.m_Index--;
     }
-    @iaop
     setIndex(i)
     {
         this.m_Index = i;
     }
-    @iaop
-    getIndex(add?: number)
+    getIndex(add?: number): number
     {
         if (add)
         {
@@ -26,8 +22,6 @@ export class E
         }
         return this.m_Index;
     }
-
-    @iaop
     add = (v: number) =>
     {
         this.m_Index += v;
