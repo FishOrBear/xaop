@@ -1,4 +1,4 @@
-import { xaop, begin } from '../src/index';
+import { xaop } from '../src/index';
 import { E } from '../example/tt';
 
 
