@@ -27,6 +27,13 @@ export class E
         this.m_Index += v;
         return this.m_Index;
     }
+
+
+    @iaop
+    update(n?: any)
+    {
+
+    }
 }
 
 
