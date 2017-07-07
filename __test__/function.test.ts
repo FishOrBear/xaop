@@ -94,7 +94,6 @@ test("全局注入", () =>
     let v;
     xaop.end(e.update, function (a)
     {
-        console.log(this);
         v = a;
     })
     e.update("测试");
@@ -116,9 +115,6 @@ test("once 单次注入", () =>
         tem = this;
         remove();
     })
-    console.log(e);
-    console.log(tem);
-
     e.add(1);
     expect(tem).toBe(e);
     tem = null;
