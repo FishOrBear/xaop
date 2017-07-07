@@ -102,3 +102,26 @@ test("全局注入", () =>
     e2.m_Index = 3;
     e2.update("")
 })
+
+
+test("once 单次注入", () =>
+{
+    let e = new E()
+
+    let remove;
+
+    let tem;
+    remove = xaop.begin(e, e.add, function ()
+    {
+        tem = this;
+        remove();
+    })
+    console.log(e);
+    console.log(tem);
+
+    e.add(1);
+    expect(tem).toBe(e);
+    tem = null;
+    e.add(2);
+    expect(tem).toBe(null);
+})
