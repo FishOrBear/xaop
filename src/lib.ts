@@ -58,132 +58,127 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
     aopMap.set(newMethon, injectFunctionData);
 };
 
-
-export namespace xaop
+enum InjectType
 {
+    begin = "__begin__",
+    end = "__end__"
+}
 
-    enum InjectType
+function getInject(injectType: InjectType)
+{
+    function injectAll(func: Function, injectFunction: Function)
     {
-        begin = "__begin__",
-        end = "__end__"
+        if (!aopMap.has(func))
+        {
+            console.warn("不存在的注入.")
+            return;
+        }
+        let data = aopMap.get(func);
+        let farr: Array<Function>;
+        switch (injectType)
+        {
+            case InjectType.begin:
+                farr = data.m_Begin;
+                break;
+            case InjectType.end:
+                farr = data.m_Ending;
+                break;
+            default:
+                break;
+        }
+        farr.push(injectFunction);
+        return function ()
+        {
+            let index = farr.indexOf(injectFunction);
+            if (index != -1)
+            {
+                farr.splice(index, 1)
+            }
+        }
     }
+    function injectObject(obj: Object, func: Function, injectFunction: Function)
+    {
+        let name = getFunctionName(obj, func);
+        let beginName = getInjectFunctionArrayName(name, injectType);
+        initInjectReplace(obj, name);
 
-    function getInject(injectType: InjectType)
+        let functionArr: Array<Function> = initInjectFunctionArray(obj, beginName);
+        functionArr.push(injectFunction);
+        return function ()
+        {
+            let index = functionArr.indexOf(injectFunction);
+            if (index != -1)
+                functionArr.splice(index, 1);
+        };
+    }
+    return function inject(...args)
     {
-        function injectAll(func: Function, injectFunction: Function)
+        if (args.length === 2)
         {
-            if (!aopMap.has(func))
-            {
-                console.warn("不存在的注入.")
-                return;
-            }
-            let data = aopMap.get(func);
-            let farr: Array<Function>;
-            switch (injectType)
-            {
-                case InjectType.begin:
-                    farr = data.m_Begin;
-                    break;
-                case InjectType.end:
-                    farr = data.m_Ending;
-                    break;
-                default:
-                    break;
-            }
-            farr.push(injectFunction);
-            return function ()
-            {
-                let index = farr.indexOf(injectFunction);
-                if (index != -1)
-                {
-                    farr.splice(index, 1)
-                }
-            }
+            return injectAll.call(this, ...args);
         }
-        function injectObject(obj: Object, func: Function, injectFunction: Function)
+        else if (args.length === 3)
         {
-            let name = getFunctionName(obj, func);
-            let beginName = getInjectFunctionArrayName(name, injectType);
-            initInjectReplace(obj, name);
+            return injectObject.call(this, ...args);
+        }
+    }
+}
+export let begin = getInject(InjectType.begin);
+export let end = getInject(InjectType.end);
 
-            let functionArr: Array<Function> = initInjectFunctionArray(obj, beginName);
-            functionArr.push(injectFunction);
-            return function ()
+function getInjectFunctionArrayName(name: string, type: InjectType)
+{
+    return type + name;
+}
+function initInjectFunctionArray(obj: Object, funcName: string): Array<Function>
+{
+    if (!obj.hasOwnProperty(funcName))
+    {
+        obj[funcName] = [];
+    }
+    return obj[funcName];
+}
+function callFunctionArray(obj: Object, name: string, ...args)
+{
+    let methonList: Array<Function> = obj[name];
+    if (methonList)
+    {
+        methonList.forEach(
+            f =>
             {
-                let index = functionArr.indexOf(injectFunction);
-                if (index != -1)
-                    functionArr.splice(index, 1);
-            };
-        }
-        return function inject(...args)
-        {
-            if (args.length === 2)
-            {
-                return injectAll.call(this, ...args);
+                f.call(obj, ...args);
             }
-            else if (args.length === 3)
+        );
+    }
+}
+function initInjectReplace(obj: Object, funcName: string)
+{
+    const key = "__aopinit__" + funcName;
+    if (!obj.hasOwnProperty(key))
+    {
+        obj[key] = true;
+        let oldFunction: Function = obj[funcName];
+        obj[funcName] = function (...args)
+        {
+            let call = function (type: InjectType)
             {
-                return injectObject.call(this, ...args);
+                callFunctionArray(obj, getInjectFunctionArrayName(funcName, type), ...args);
             }
-        }
+            call(InjectType.begin);
+            let res = oldFunction.call(obj, ...args);
+            args.push(res);
+            call(InjectType.end);
+            return res;
+        };
     }
-    export let begin = getInject(InjectType.begin);
-    export let end = getInject(InjectType.end);
-
-    function getInjectFunctionArrayName(name: string, type: InjectType)
+}
+function getFunctionName(obj: Object, f: Function): string
+{
+    for (let key in obj)
     {
-        return type + name;
-    }
-    function initInjectFunctionArray(obj: Object, funcName: string): Array<Function>
-    {
-        if (!obj.hasOwnProperty(funcName))
+        if (obj[key] == f)
         {
-            obj[funcName] = [];
-        }
-        return obj[funcName];
-    }
-    function callFunctionArray(obj: Object, name: string, ...args)
-    {
-        let methonList: Array<Function> = obj[name];
-        if (methonList)
-        {
-            methonList.forEach(
-                f =>
-                {
-                    f.call(obj, ...args);
-                }
-            );
-        }
-    }
-    function initInjectReplace(obj: Object, funcName: string)
-    {
-        const key = "__aopinit__" + funcName;
-        if (!obj.hasOwnProperty(key))
-        {
-            obj[key] = true;
-            let oldFunction: Function = obj[funcName];
-            obj[funcName] = function (...args)
-            {
-                let call = function (type: InjectType)
-                {
-                    callFunctionArray(obj, getInjectFunctionArrayName(funcName, type), ...args);
-                }
-                call(InjectType.begin);
-                let res = oldFunction.call(obj, ...args);
-                args.push(res);
-                call(InjectType.end);
-                return res;
-            };
-        }
-    }
-    function getFunctionName(obj: Object, f: Function): string
-    {
-        for (let key in obj)
-        {
-            if (obj[key] == f)
-            {
-                return key;
-            }
+            return key;
         }
     }
 }

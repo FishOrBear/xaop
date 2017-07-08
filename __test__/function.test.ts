@@ -1,6 +1,5 @@
-import { xaop } from '../src/index';
 import { E } from '../example/tt';
-
+import { begin, end } from '../src/lib';
 
 test("在函数开始的地方注入,并且测试不同的实例", () =>
 {
@@ -9,7 +8,7 @@ test("在函数开始的地方注入,并且测试不同的实例", () =>
 
     expect(e.m_Index).toBe(-1);
 
-    xaop.begin(e, e.decrement, function ()
+    begin(e, e.decrement, function ()
     {
         this.m_Index += 10;
     })
@@ -26,7 +25,7 @@ test("测试删除注入", () =>
 {
     let e = new E()
 
-    let remove = xaop.begin(e, e.add, function ()
+    let remove = begin(e, e.add, function ()
     {
         this.m_Index++;
     })
@@ -42,7 +41,7 @@ test("测试捕获参数", () =>
     let e = new E();
 
     let catchValue;
-    let remove = xaop.begin(e, e.setIndex, function (i: number)
+    let remove = begin(e, e.setIndex, function (i: number)
     {
         catchValue = i;
     })
@@ -54,7 +53,7 @@ test("测试捕获返回", () =>
 {
     let e = new E()
     let res;
-    xaop.end(e, e.getIndex, function (...args: Array<any>)
+    end(e, e.getIndex, function (...args: Array<any>)
     {
         res = args[args.length - 1];
     })
@@ -65,7 +64,7 @@ test("测试捕获返回", () =>
 test("测试修改参数", () =>
 {
     let e = new E();
-    xaop.begin(e, e.setIndex, function (...args)
+    begin(e, e.setIndex, function (...args)
     {
         args[0] = 222;
     }
@@ -79,7 +78,7 @@ test("全局注入", () =>
 {
     let e = new E();
     let callCout = 0;
-    let remove = xaop.begin(e.update, () =>
+    let remove = begin(e.update, () =>
     {
         callCout++;
     })
@@ -92,7 +91,7 @@ test("全局注入", () =>
 
     remove();
     let v;
-    xaop.end(e.update, function (a)
+    end(e.update, function (a)
     {
         v = a;
     })
@@ -110,7 +109,7 @@ test("once 单次注入", () =>
     let remove;
 
     let tem;
-    remove = xaop.begin(e, e.add, function ()
+    remove = begin(e, e.add, function ()
     {
         tem = this;
         remove();
@@ -127,12 +126,12 @@ test("对象 同时注入2个函数", () =>
 {
     let e = new E()
     let cout = 0;
-    xaop.begin(e, e.decrement, () =>
+    begin(e, e.decrement, () =>
     {
         cout++
     });
 
-    xaop.begin(e, e.increment, () =>
+    begin(e, e.increment, () =>
     {
         cout++
     })

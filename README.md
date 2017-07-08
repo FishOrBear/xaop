@@ -11,7 +11,10 @@ Typescript 的Aop实现.
 ```
 npm i xaop
 ```
-
+##升级
+```
+npm publish
+```
 ##全局注入
 ```ts
 class E
