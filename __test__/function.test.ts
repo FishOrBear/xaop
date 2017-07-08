@@ -121,3 +121,24 @@ test("once 单次注入", () =>
     e.add(2);
     expect(tem).toBe(null);
 })
+
+
+test("对象 同时注入2个函数", () =>
+{
+    let e = new E()
+    let cout = 0;
+    xaop.begin(e, e.decrement, () =>
+    {
+        cout++
+    });
+
+    xaop.begin(e, e.increment, () =>
+    {
+        cout++
+    })
+
+    e.decrement()
+    e.increment()
+
+    expect(cout).toBe(2);
+})

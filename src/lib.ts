@@ -157,7 +157,7 @@ export namespace xaop
     }
     function initInjectReplace(obj: Object, funcName: string)
     {
-        const key = "__aop__init";
+        const key = "__aopinit__" + funcName;
         if (!obj.hasOwnProperty(key))
         {
             obj[key] = true;
