@@ -11,6 +11,7 @@
             "node"
         ],
         "module": "commonjs",
+        "sourceMap": true,
         "experimentalDecorators": true
     },
     "include": [
