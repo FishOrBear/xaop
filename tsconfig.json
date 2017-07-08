@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "outDir": "./built",
-        "allowJs": true,
+        "outDir": "./dist",
+        "declaration": true,
         "target": "es5",
         "lib": [
             "es7",
@@ -14,8 +14,7 @@
         "experimentalDecorators": true
     },
     "include": [
-        "./src/**/*",
-        "./example/**/*"
+        "./src/**/*"
     ],
     "jest": {
         "globals": {
