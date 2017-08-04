@@ -15,6 +15,16 @@ npm i xaop
 ```
 npm publish
 ```
+
+##注意:
+默认构造参数无法捕获初始化参数.
+```ts
+function add(a,b=1) //这里的b是无法捕获到的
+{
+
+}
+```
+
 ##全局注入
 ```ts
 class E

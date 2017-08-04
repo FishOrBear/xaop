@@ -10,7 +10,7 @@ export class E
     {
         this.m_Index--;
     }
-    setIndex(i)
+    setIndex(i = 6)
     {
         this.m_Index = i;
     }

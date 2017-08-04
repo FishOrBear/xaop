@@ -1,5 +1,5 @@
 import { E } from '../example/tt';
-import { begin, end } from '../src/lib';
+import { end, begin, end } from '../src/lib';
 
 test("在函数开始的地方注入,并且测试不同的实例", () =>
 {
@@ -47,6 +47,10 @@ test("测试捕获参数", () =>
     })
     e.setIndex(5);
     expect(catchValue).toBe(5);
+
+    // e.setIndex();
+    // 这里不能通过测试. 因为默认构造参数无法捕获.
+    // expect(catchValue).toBe(6);
 })
 
 test("测试捕获返回", () =>
