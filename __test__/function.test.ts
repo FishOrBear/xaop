@@ -1,5 +1,5 @@
 import { E } from '../example/tt';
-import { end, begin, end } from '../src/lib';
+import { end, begin } from '../src/lib';
 
 test("在函数开始的地方注入,并且测试不同的实例", () =>
 {
