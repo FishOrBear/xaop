@@ -2,4 +2,5 @@ tsconfig.json
 src
 example
 __test__
+coverage
 .vscode

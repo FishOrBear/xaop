@@ -1,1 +1,1 @@
-export { iaop, begin, end } from "./lib"
+export { iaop, begin, end, getFunctionName } from "./lib"
