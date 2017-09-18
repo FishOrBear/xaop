@@ -172,7 +172,7 @@ function initInjectReplace(obj: Object, funcName: string)
         };
     }
 }
-function getFunctionName(obj: Object, f: Function): string
+export function getFunctionName(obj: Object, f: Function): string
 {
     for (let key in obj)
     {
