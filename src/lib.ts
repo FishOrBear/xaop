@@ -172,8 +172,20 @@ function initInjectReplace(obj: Object, funcName: string)
         };
     }
 }
+
+/**
+ * 
+ * 返回函数的名称.稳妥起见,你应该传入 {class}.prototype.{function}
+ * 
+ * @export
+ * @param {Object} obj 
+ * @param {Function} f 
+ * @returns {string} 
+ */
 export function getFunctionName(obj: Object, f: Function): string
 {
+    if (f.name)
+        return f.name;
     for (let key in obj)
     {
         if (obj[key] == f)
