@@ -153,7 +153,7 @@ function callFunctionArray(obj: Object, name: string, ...args)
 }
 function initInjectReplace(obj: Object, funcName: string)
 {
-    const key = "__aopinit__" + funcName;
+    const key = Symbol.for("__aopinit__" + funcName);
     if (!obj.hasOwnProperty(key))
     {
         obj[key] = true;

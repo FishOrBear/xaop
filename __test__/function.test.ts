@@ -1,5 +1,5 @@
 import { E } from '../example/tt';
-import { end, begin } from '../src/lib';
+import { begin, end } from '../src/lib';
 
 test("在函数开始的地方注入,并且测试不同的实例", () =>
 {
@@ -145,3 +145,28 @@ test("对象 同时注入2个函数", () =>
 
     expect(cout).toBe(2);
 })
+
+test("对象注入两次", () =>
+{
+    let e = new E();
+
+    let i = 0;
+    begin(e, e.decrement, () =>
+    {
+        i++;
+        console.log(i);
+    })
+
+    begin(e, e.decrement, () =>
+    {
+        i++;
+        console.log(i);
+    })
+
+    e.decrement();
+
+    expect(i).toBe(2);
+
+})
+
+

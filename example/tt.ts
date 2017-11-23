@@ -34,6 +34,11 @@ export class E
     {
 
     }
+
+    static test()
+    {
+
+    }
 }
 
 
