@@ -1,30 +1,65 @@
-let aopMap = new Map<any, AopData>();
+import { InjectType } from "./type";
 
+//aop注入数据的缓存
+let aopMap = new WeakMap<any, AopData>();
+
+
+/**
+ * 保存被注入的函数列表
+ * 
+ * @class AopData
+ */
 class AopData
 {
+    //函数开始执行时的调用函数列表
     m_Begin: Array<Function> = []
+    //函数结束执行时调用的函数列表
     m_Ending: Array<Function> = []
 }
 
-//全局注入.
+/**
+ * 函数调用
+ * 
+ * @param {Function[]} funcList 函数列表
+ * @param {Object} object 源对象
+ * @param {any} args 参数列表
+ */
+function functionCall(funcList: Function[], object: Object, ...args)
+{
+    for (let f of funcList)
+    {
+        if (f.call(object, ...args)) //如果函数返回true 那么结束注入.
+            return;
+    }
+}
+
+/**
+ * 
+ * 全局注入装饰器.
+ * 
+ * @export
+ * @param {Object} target 目标类
+ * @param {(string | symbol)} propertyKey 装饰key
+ * @param {any} [descriptor] 描述
+ */
 export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
 {
-    let injectFunctionData = new AopData();
+    //声明注入数据
+    let injectData = new AopData();
+    //缓存旧的函数
     let _oldFunc;
 
-    function call(funcArr: Array<Function>, obj: Object, ...args)
+    //构建新的函数
+    let newFunction = function (...args)
     {
-        funcArr.forEach(f =>
-        {
-            f.call(obj, ...args);
-        });
-    }
-    let newMethon = function (...args)
-    {
-        call(injectFunctionData.m_Begin, this, ...args);
+        //调用起始注入的函数列表
+        functionCall(injectData.m_Begin, this, ...args);
+        //调用原始的函数
         let res = _oldFunc.call(this, ...args);
+        //将原始结果加入到参数列表中
         args.push(res);
-        call(injectFunctionData.m_Ending, this, ...args);
+        //调用结束的注入
+        functionCall(injectData.m_Ending, this, ...args);
         return res;
     }
     if (!descriptor)
@@ -32,7 +67,7 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
         var getter = function ()
         {
             if (typeof _oldFunc == "function")
-                return newMethon;
+                return newFunction;
             else
             {
                 console.warn("warning:this is not a function!")
@@ -53,18 +88,19 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
     else
     {
         _oldFunc = descriptor.value;
-        descriptor.value = newMethon
+        descriptor.value = newFunction
     }
-    aopMap.set(newMethon, injectFunctionData);
+    aopMap.set(newFunction, injectData);
 };
 
-enum InjectType
-{
-    begin = "__begin__",
-    end = "__end__"
-}
 
-function getInject(injectType: InjectType)
+/**
+ * 返回注入方法.
+ * 
+ * @param {InjectType} injectType 
+ * @returns 
+ */
+function Inject(injectType: InjectType)
 {
     function injectAll(func: Function, injectFunction: Function)
     {
@@ -86,7 +122,7 @@ function getInject(injectType: InjectType)
             default:
                 break;
         }
-        farr.push(injectFunction);
+        farr.unshift(injectFunction);
         return function ()
         {
             let index = farr.indexOf(injectFunction);
@@ -103,7 +139,7 @@ function getInject(injectType: InjectType)
         initInjectReplace(obj, name);
 
         let functionArr: Array<Function> = initInjectFunctionArray(obj, beginName);
-        functionArr.push(injectFunction);
+        functionArr.unshift(injectFunction);
         return function ()
         {
             let index = functionArr.indexOf(injectFunction);
@@ -123,13 +159,28 @@ function getInject(injectType: InjectType)
         }
     }
 }
-export let begin = getInject(InjectType.begin);
-export let end = getInject(InjectType.end);
+export let begin = Inject(InjectType.begin);
+export let end = Inject(InjectType.end);
 
+/**
+ * 获得注入的函数名称.
+ * 
+ * @param {string} name 
+ * @param {InjectType} type 
+ * @returns 
+ */
 function getInjectFunctionArrayName(name: string, type: InjectType)
 {
     return type + name;
 }
+
+/**
+ * 初始化注入.
+ * 
+ * @param {Object} obj 
+ * @param {string} funcName 
+ * @returns {Array<Function>} 
+ */
 function initInjectFunctionArray(obj: Object, funcName: string): Array<Function>
 {
     if (!obj.hasOwnProperty(funcName))
@@ -138,36 +189,40 @@ function initInjectFunctionArray(obj: Object, funcName: string): Array<Function>
     }
     return obj[funcName];
 }
-function callFunctionArray(obj: Object, name: string, ...args)
+
+function callFunctionArray(thisArg: Object, name: string, ...args)
 {
-    let methonList: Array<Function> = obj[name];
-    if (methonList)
+    let funcList: Array<Function> = thisArg[name];
+    if (funcList)
     {
-        methonList.forEach(
-            f =>
-            {
-                f.call(obj, ...args);
-            }
-        );
+        functionCall(funcList, thisArg, ...args);
     }
 }
-function initInjectReplace(obj: Object, funcName: string)
+
+function callInjectFunctionList(target: Object, funcName: string, type: InjectType, ...args)
+{
+    callFunctionArray(target, getInjectFunctionArrayName(funcName, type), ...args);
+}
+
+/**
+ * 初始化注入
+ * 
+ * @param {Object} target 目标对象
+ * @param {string} funcName 目标函数
+ */
+function initInjectReplace(target: Object, funcName: string)
 {
     const key = Symbol.for("__aopinit__" + funcName);
-    if (!obj.hasOwnProperty(key))
+    if (!target.hasOwnProperty(key))
     {
-        obj[key] = true;
-        let oldFunction: Function = obj[funcName];
-        obj[funcName] = function (...args)
+        target[key] = true;
+        let oldFunction: Function = target[funcName];
+        target[funcName] = function (...args)
         {
-            let call = function (type: InjectType)
-            {
-                callFunctionArray(obj, getInjectFunctionArrayName(funcName, type), ...args);
-            }
-            call(InjectType.begin);
-            let res = oldFunction.call(obj, ...args);
+            callInjectFunctionList(target, funcName, InjectType.begin, ...args);
+            let res = oldFunction.call(target, ...args);
             args.push(res);
-            call(InjectType.end);
+            callInjectFunctionList(target, funcName, InjectType.end, ...args);
             return res;
         };
     }
@@ -178,17 +233,17 @@ function initInjectReplace(obj: Object, funcName: string)
  * 返回函数的名称.稳妥起见,你应该传入 {class}.prototype.{function}
  * 
  * @export
- * @param {Object} obj 
- * @param {Function} f 
+ * @param {Object} target 
+ * @param {Function} func 
  * @returns {string} 
  */
-export function getFunctionName(obj: Object, f: Function): string
+export function getFunctionName(target: Object, func: Function): string
 {
-    if (f.name)
-        return f.name;
-    for (let key in obj)
+    if (func.name)
+        return func.name;
+    for (let key in target)
     {
-        if (obj[key] == f)
+        if (target[key] == func)
         {
             return key;
         }

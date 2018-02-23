@@ -170,3 +170,29 @@ test("对象注入两次", () =>
 })
 
 
+test('中断注入', () =>
+{
+    let e = new E();
+
+
+    //先注入的 后执行
+    begin(e, e.decrement, () =>
+    {
+        e.m_Index = 6;
+    })
+
+    //后注入的先执行
+    begin(e, e.decrement, () =>
+    {
+        e.m_Index = 15;
+        return true;//break
+    })
+
+    console.log(e.m_Index);
+
+    e.decrement();
+
+    console.log(e.m_Index);
+
+    expect(e.m_Index).toBe(14);
+});

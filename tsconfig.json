@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "./dist",
         "declaration": true,
-        "target": "es5",
+        "target": "esnext",
         "lib": [
             "es7",
             "dom"
