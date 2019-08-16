@@ -6,8 +6,6 @@ let aopMap = new WeakMap<any, AopData>();
 
 /**
  * 保存被注入的函数列表
- * 
- * @class AopData
  */
 class AopData
 {
@@ -24,7 +22,7 @@ class AopData
  * @param {Object} object 源对象
  * @param {any} args 参数列表
  */
-function functionCall(funcList: Function[], object: Object, ...args)
+function functionCall(funcList: Function[], object: Object, ...args: any[])
 {
     for (let f of funcList)
     {
@@ -34,15 +32,13 @@ function functionCall(funcList: Function[], object: Object, ...args)
 }
 
 /**
- * 
  * 全局注入装饰器.
  * 
- * @export
  * @param {Object} target 目标类
  * @param {(string | symbol)} propertyKey 装饰key
  * @param {any} [descriptor] 描述
  */
-export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
+export function iaop(target: Object, propertyKey: string | symbol, descriptor?: any)
 {
     //声明注入数据
     let injectData = new AopData();
@@ -64,7 +60,7 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
     }
     if (!descriptor)
     {
-        var getter = function ()
+        let getter = function ()
         {
             if (typeof _oldFunc == "function")
                 return newFunction;
@@ -74,7 +70,7 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
                 return _oldFunc
             }
         };
-        var setter = function (newVal)
+        let setter = function (newVal)
         {
             _oldFunc = newVal;
         };
@@ -83,7 +79,7 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
             set: setter,
             enumerable: true,
             configurable: true
-        })
+        });
     }
     else
     {
@@ -91,16 +87,13 @@ export function iaop(target: Object, propertyKey: string | symbol, descriptor?)
         descriptor.value = newFunction
     }
     aopMap.set(newFunction, injectData);
-};
+}
 
 
 /**
  * 返回注入方法.
- * 
- * @param {InjectType} injectType 
- * @returns 
  */
-function Inject(injectType: InjectType)
+function Inject(injectType: InjectType): Function
 {
     function injectAll(func: Function, injectFunction: Function)
     {
@@ -123,6 +116,10 @@ function Inject(injectType: InjectType)
                 break;
         }
         farr.unshift(injectFunction);
+
+        if (farr.length > 20)
+            console.warn("aop注入函数个数超过20", injectFunction);
+
         return function ()
         {
             let index = farr.indexOf(injectFunction);
@@ -140,6 +137,10 @@ function Inject(injectType: InjectType)
 
         let functionArr: Array<Function> = initInjectFunctionArray(obj, beginName);
         functionArr.unshift(injectFunction);
+
+        if (functionArr.length > 20)
+            console.warn("aop注入函数个数超过20", injectFunction);
+
         return function ()
         {
             let index = functionArr.indexOf(injectFunction);
@@ -159,27 +160,20 @@ function Inject(injectType: InjectType)
         }
     }
 }
+
 export let begin = Inject(InjectType.begin);
 export let end = Inject(InjectType.end);
 
 /**
  * 获得注入的函数名称.
- * 
- * @param {string} name 
- * @param {InjectType} type 
- * @returns 
  */
-function getInjectFunctionArrayName(name: string, type: InjectType)
+function getInjectFunctionArrayName(name: string, type: InjectType): string
 {
     return type + name;
 }
 
 /**
  * 初始化注入.
- * 
- * @param {Object} obj 
- * @param {string} funcName 
- * @returns {Array<Function>} 
  */
 function initInjectFunctionArray(obj: Object, funcName: string): Array<Function>
 {
@@ -190,7 +184,7 @@ function initInjectFunctionArray(obj: Object, funcName: string): Array<Function>
     return obj[funcName];
 }
 
-function callFunctionArray(thisArg: Object, name: string, ...args)
+function callFunctionArray(thisArg: Object, name: string, ...args: any[])
 {
     let funcList: Array<Function> = thisArg[name];
     if (funcList)
@@ -229,13 +223,7 @@ function initInjectReplace(target: Object, funcName: string)
 }
 
 /**
- * 
  * 返回函数的名称.稳妥起见,你应该传入 {class}.prototype.{function}
- * 
- * @export
- * @param {Object} target 
- * @param {Function} func 
- * @returns {string} 
  */
 export function getFunctionName(target: Object, func: Function): string
 {
