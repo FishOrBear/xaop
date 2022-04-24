@@ -4,18 +4,19 @@
         "declaration": true,
         "target": "esnext",
         "lib": [
-            "es7",
-            "dom"
+            "es7"
         ],
         "types": [
-            "node"
+            "node",
+            "jest"
         ],
         "module": "commonjs",
         "sourceMap": true,
         "experimentalDecorators": true
     },
     "include": [
-        "./src/**/*"
+        "./src/**/*",
+        "./__test__/**/*"
     ],
     "jest": {
         "globals": {

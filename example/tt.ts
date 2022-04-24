@@ -1,32 +1,32 @@
 import { iaop } from '../src/index';
 export class E
 {
-    m_Index = 0;
+    _Index = 0;
     increment()
     {
-        this.m_Index++;
+        this._Index++;
     }
     decrement()
     {
-        this.m_Index--;
+        this._Index--;
     }
     setIndex(i = 6)
     {
-        this.m_Index = i;
+        this._Index = i;
     }
     getIndex(add?: number): number
     {
         if (add)
         {
-            return this.m_Index + add;
+            return this._Index + add;
         }
-        return this.m_Index;
+        return this._Index;
     }
     add = (v: number) =>
     {
-        this.m_Index += v;
-        return this.m_Index;
-    }
+        this._Index += v;
+        return this._Index;
+    };
 
 
     @iaop
@@ -39,6 +39,9 @@ export class E
     {
 
     }
+
+    // @iaop
+    // name = "string";
 }
 
 

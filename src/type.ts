@@ -1,7 +1,7 @@
 
 // /**
 //  * 指定aop是否继续执行
-//  * 
+//  *
 //  * @export
 //  * @enum {number}
 //  */
@@ -14,7 +14,7 @@
 
 /**
  * 注入类型.
- * 
+ *
  * @enum {number}
  */
 export enum InjectType
