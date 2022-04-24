@@ -4,3 +4,5 @@ example
 __test__
 coverage
 .vscode
+package-lock.json
+yarn.lock
