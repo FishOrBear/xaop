@@ -1,4 +1,4 @@
-import { iaop } from '../src/index';
+import { begin, iaop, iaop2 } from '../src/index';
 export class E
 {
     _Index = 0;
@@ -35,7 +35,13 @@ export class E
 
     }
 
-    static test()
+    @iaop
+    static test2()
+    {
+
+    }
+
+    static test1()
     {
 
     }
@@ -46,3 +52,36 @@ export class E
 
 
 //Lock the __test__
+
+
+iaop2(E, "test1");
+
+
+begin(E.test1, () =>
+{
+    console.log("test1");
+});
+
+begin(E.test2, () =>
+{
+    console.log("test2");
+});
+
+begin(E.prototype.update, () =>
+{
+    console.log("update");
+});
+
+E.test1();
+E.test2();
+
+
+let e = new E();
+begin(e.update, () =>
+{
+    console.log("update2");
+});
+e.update();
+
+let e2 = new E();
+e2.update();

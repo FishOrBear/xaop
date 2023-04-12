@@ -16,6 +16,22 @@
             "protocol": "inspector",
             "console": "integratedTerminal",
             "sourceMaps": true
-        }
+        },
+        {
+            "name": "运行 当前TS文件",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${relativeFile}"
+            ],
+            "runtimeArgs": [
+                "--nolazy",
+                "-r",
+                "ts-node/register/transpile-only",
+            ],
+            "cwd": "${workspaceFolder}",
+            "protocol": "inspector",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
     ]
 }

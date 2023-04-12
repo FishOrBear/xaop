@@ -35,7 +35,7 @@ function functionCall(funcList: Function[], object: Object, ...args: any[])
 }
 
 /**
- * 全局注入装饰器.
+ * 全局注入装饰器 @iaop
  * @param {Object} target 目标类
  * @param {(string | symbol)} propertyKey 装饰key
  * @param {any} [descriptor] 描述
@@ -91,6 +91,25 @@ export function iaop<T extends Object>(target: T, propertyKey: FunctionPropertyN
     aopMap.set(newFunction, injectData);
 }
 
+//@ts-ignore
+function decorate(decorators, target, key, desc)
+{
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    //@ts-ignore
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+
+/**
+ * 手动装饰器
+ * @param target A.prototype
+ * @param propertyKey "hello"
+ */
+export function iaop2<T extends Object>(target: T, propertyKey: FunctionPropertyNames<T>)
+{
+    decorate([iaop], target, propertyKey, null);
+}
 
 /**
  * 返回注入方法.
